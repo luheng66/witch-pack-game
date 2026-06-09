@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>女巫出门前 - 背包整理原型</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <button class="gm-reset" id="gmResetBtn" type="button" title="重置整个游戏到第 1 关">GM 重开</button>
+      <section class="game" aria-label="女巫背包整理小游戏">
+        <header class="hud">
+          <div>
+            <p class="eyebrow" id="dayLabel">Day 1</p>
+            <h1 id="destination">森林采露水</h1>
+          </div>
+          <div class="stars" id="stars" aria-label="星级预览">☆☆☆</div>
+        </header>
+
+        <aside class="witch-panel">
+          <div class="witch-scene" aria-hidden="true">
+            <div class="moon"></div>
+            <div class="witch">
+              <div class="hat"></div>
+              <div class="hat-band"></div>
+              <div class="hair"></div>
+              <div class="face">
+                <span></span><span></span>
+              </div>
+              <div class="body"></div>
+            </div>
+          </div>
+          <div class="witch-info">
+            <h2>露娜</h2>
+            <p id="brief">今天要去森林采集晨露。至少准备 18 点，草药靠近药水会有额外加成。</p>
+            <div class="rule-chip" id="ruleChip">规则：相邻加成</div>
+          </div>
+        </aside>
+
+        <section class="backpack-panel">
+          <div class="panel-title">
+            <h2>魔法背包</h2>
+            <p id="hint">拖动物品到格子里，按 R 或点旋转。</p>
+          </div>
+          <div class="score-block">
+            <span id="scoreText">准备值 0 / 18</span>
+            <div class="progress" aria-hidden="true">
+              <span id="progressFill"></span>
+            </div>
+          </div>
+          <div id="gridWrap" class="grid-wrap">
+            <div id="grid" class="grid" aria-label="背包格子"></div>
+            <div id="placedLayer" class="placed-layer"></div>
+            <div id="dragPreview" class="drag-preview" hidden></div>
+          </div>
+          <button class="depart-btn" id="departBtn" type="button" disabled>未达成</button>
+        </section>
+
+        <section class="items-panel">
+          <div class="panel-title">
+            <h2>桌面物品</h2>
+            <p id="remainingText">选择要带走的东西</p>
+          </div>
+          <div id="itemPool" class="item-pool"></div>
+        </section>
+
+        <footer class="actions">
+          <button class="secondary" id="rotateBtn" type="button">旋转 R</button>
+          <button class="secondary" id="undoBtn" type="button">撤销</button>
+          <button class="secondary" id="resetBtn" type="button">重置</button>
+          <button class="secondary" id="exitBtn" type="button">退出</button>
+        </footer>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" hidden></div>
+
+    <div class="modal" id="clearModal" hidden>
+      <div class="modal-card">
+        <div class="sparkle"></div>
+        <h2>准备完成！</h2>
+        <p class="rating" id="ratingText">完美收纳 ★★★</p>
+        <p id="clearCopy">背包啪地合上，露娜带着满满魔力出发。</p>
+        <button class="primary" id="nextBtn" type="button">下一关</button>
+      </div>
+    </div>
+
+    <div class="modal" id="exitModal" hidden>
+      <div class="modal-card exit">
+        <div class="exit-icon">🚪</div>
+        <h2>退出游戏</h2>
+        <p id="exitCopy">确定要退出游戏吗？当前进度将会保存。</p>
+        <div class="modal-actions">
+          <button class="secondary" id="cancelExitBtn" type="button">继续游戏</button>
+          <button class="primary" id="confirmExitBtn" type="button">确认退出</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./game.js?v=20260609-config-load"></script>
+  </body>
+</html>

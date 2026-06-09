@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据验证 - 女巫背包</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .validation-results {
+            margin-bottom: 30px;
+        }
+
+        .validation-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .validation-item.success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            color: #155724;
+        }
+
+        .validation-item.error {
+            background: #f8d7da;
+            border: 1px solid #dc3545;
+            color: #721c24;
+        }
+
+        .validation-item.warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+        }
+
+        .icon {
+            font-size: 20px;
+        }
+
+        .tables-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .table-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .table-body {
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .summary h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .summary ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .summary li {
+            padding: 5px 0;
+            color: #666;
+        }
+
+        .summary li strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 数据结构验证报告</h1>
+        
+        <div class="validation-results" id="validationResults"></div>
+
+        <div class="summary" id="summary"></div>
+
+        <div class="tables-section">
+            <div class="table-card">
+                <div class="table-header">📦 物品表 (itemsTable)</div>
+                <div class="table-body" id="itemsTableBody"></div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">🎮 关卡表 (levelsTable)</div>
+                <div class="table-body" id="levelsTableBody"></div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">🔗 关卡物品关联表 (levelItemsTable)</div>
+                <div class="table-body" id="levelItemsTableBody"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+    <script>
+        // 数据验证
+        const results = [];
+        const errors = [];
+        const warnings = [];
+
+        // 验证1: 检查itemsTable中的必填字段
+        const requiredItemFields = ['id', 'name', 'icon', 'width', 'height', 'score'];
+        itemsTable.forEach((item, index) => {
+            const missingFields = requiredItemFields.filter(field => !item[field]);
+            if (missingFields.length > 0) {
+                errors.push(`物品 "${item.id || index}" 缺少字段: ${missingFields.join(', ')}`);
+            }
+        });
+        if (errors.length === 0) {
+            results.push({ type: 'success', message: `物品表验证通过: ${itemsTable.length} 个物品，所有必填字段完整` });
+        }
+
+        // 验证2: 检查levelsTable中的必填字段
+        const requiredLevelFields = ['id', 'name', 'gridCols', 'gridRows', 'targetScore'];
+        levelsTable.forEach((level, index) => {
+            const missingFields = requiredLevelFields.filter(field => level[field] === undefined);
+            if (missingFields.length > 0) {
+                errors.push(`关卡 "${level.name || index}" 缺少字段: ${missingFields.join(', ')}`);
+            }
+        });
+        if (errors.length === 0) {
+            results.push({ type: 'success', message: `关卡表验证通过: ${levelsTable.length} 个关卡，所有必填字段完整` });
+        }
+
+        // 验证3: 检查levelItemsTable中的levelId是否都在levelsTable中存在
+        levelItemsTable.forEach(levelItem => {
+            const levelExists = levelsTable.some(level => level.id === levelItem.levelId);
+            if (!levelExists) {
+                errors.push(`关卡物品关联表中的 levelId ${levelItem.levelId} 在关卡表中不存在`);
+            }
+        });
+        if (levelItemsTable.length !== levelsTable.length) {
+            warnings.push(`关卡物品关联表记录数 (${levelItemsTable.length}) 与关卡表记录数 (${levelsTable.length}) 不一致`);
+        }
+
+        // 验证4: 检查levelItemsTable中的items是否都在itemsTable中存在
+        const allItemIds = itemsTable.map(item => item.id);
+        levelItemsTable.forEach(levelItem => {
+            levelItem.items.forEach(itemId => {
+                if (!allItemIds.includes(itemId)) {
+                    errors.push(`关卡 ${levelItem.levelId} 中的物品 "${itemId}" 在物品表中不存在`);
+                }
+            });
+        });
+
+        // 验证5: 检查关卡ID唯一性
+        const levelIds = levelsTable.map(level => level.id);
+        const duplicateLevelIds = levelIds.filter((id, index) => levelIds.indexOf(id) !== index);
+        if (duplicateLevelIds.length > 0) {
+            errors.push(`关卡ID重复: ${[...new Set(duplicateLevelIds)].join(', ')}`);
+        }
+
+        // 验证6: 检查物品ID唯一性
+        const itemIds = itemsTable.map(item => item.id);
+        const duplicateItemIds = itemIds.filter((id, index) => itemIds.indexOf(id) !== index);
+        if (duplicateItemIds.length > 0) {
+            errors.push(`物品ID重复: ${[...new Set(duplicateItemIds)].join(', ')}`);
+        }
+
+        // 验证7: 检查背包尺寸是否合理
+        levelsTable.forEach(level => {
+            if (level.gridCols < 3 || level.gridRows < 3) {
+                warnings.push(`关卡 "${level.name}" 的背包尺寸过小 (${level.gridCols}x${level.gridRows})`);
+            }
+            if (level.gridCols > 10 || level.gridRows > 10) {
+                warnings.push(`关卡 "${level.name}" 的背包尺寸过大 (${level.gridCols}x${level.gridRows})`);
+            }
+        });
+
+        // 渲染验证结果
+        function renderValidationResults() {
+            const container = document.getElementById('validationResults');
+            let html = '';
+            
+            results.forEach(result => {
+                html += `
+                    <div class="validation-item ${result.type}">
+                        <span class="icon">${result.type === 'success' ? '✅' : result.type === 'error' ? '❌' : '⚠️'}</span>
+                        <span>${result.message}</span>
+                    </div>
+                `;
+            });
+
+            errors.forEach(error => {
+                html += `
+                    <div class="validation-item error">
+                        <span class="icon">❌</span>
+                        <span>${error}</span>
+                    </div>
+                `;
+            });
+
+            warnings.forEach(warning => {
+                html += `
+                    <div class="validation-item warning">
+                        <span class="icon">⚠️</span>
+                        <span>${warning}</span>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 渲染汇总信息
+        function renderSummary() {
+            const container = document.getElementById('summary');
+            container.innerHTML = `
+                <h3>📈 数据汇总</h3>
+                <ul>
+                    <li><strong>物品总数:</strong> ${itemsTable.length} 个</li>
+                    <li><strong>关卡总数:</strong> ${levelsTable.length} 个</li>
+                    <li><strong>关卡物品关联:</strong> ${levelItemsTable.length} 条</li>
+                    <li><strong>验证错误:</strong> ${errors.length} 个</li>
+                    <li><strong>验证警告:</strong> ${warnings.length} 个</li>
+                </ul>
+            `;
+        }
+
+        // 渲染物品表
+        function renderItemsTable() {
+            const container = document.getElementById('itemsTableBody');
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>尺寸</th>
+                            <th>分值</th>
+                            <th>类型</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            itemsTable.forEach(item => {
+                html += `
+                    <tr>
+                        <td><span class="badge badge-success">${item.id}</span></td>
+                        <td>${item.name}</td>
+                        <td>${item.width}x${item.height}</td>
+                        <td>${item.score}</td>
+                        <td>${item.type}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // 渲染关卡表
+        function renderLevelsTable() {
+            const container = document.getElementById('levelsTableBody');
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>背包</th>
+                            <th>目标分</th>
+                            <th>物品总分</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            levelsTable.forEach(level => {
+                html += `
+                    <tr>
+                        <td><span class="badge badge-success">${level.id}</span></td>
+                        <td>${level.name}</td>
+                        <td>${level.gridCols}x${level.gridRows}</td>
+                        <td>${level.targetScore}</td>
+                        <td>${level.itemsTotalScore || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // 渲染关卡物品关联表
+        function renderLevelItemsTable() {
+            const container = document.getElementById('levelItemsTableBody');
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>关卡ID</th>
+                            <th>可选物品</th>
+                            <th>物品数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            levelItemsTable.forEach(levelItem => {
+                const itemNames = levelItem.items.map(id => {
+                    const item = itemsTable.find(i => i.id === id);
+                    return item ? item.name : `<span style="color:red">${id}</span>`;
+                }).join(', ');
+                
+                html += `
+                    <tr>
+                        <td><span class="badge badge-success">${levelItem.levelId}</span></td>
+                        <td>${itemNames}</td>
+                        <td>${levelItem.items.length}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // 初始化
+        renderValidationResults();
+        renderSummary();
+        renderItemsTable();
+        renderLevelsTable();
+        renderLevelItemsTable();
+    </script>
+</body>
+</html>

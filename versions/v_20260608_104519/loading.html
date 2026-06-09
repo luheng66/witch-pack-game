@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>魔法背包 - 加载中</title>
+  <style>
+    :root {
+      --ink: #241b2f;
+      --muted: #73677f;
+      --bg: #f7efe3;
+      --violet: #6b4ba1;
+      --mint: #8fd5b2;
+      --gold: #f3c66d;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: var(--ink);
+      font-family: Inter, "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(143, 213, 178, 0.3), transparent 35%),
+        radial-gradient(circle at 80% 80%, rgba(107, 75, 161, 0.2), transparent 35%),
+        linear-gradient(145deg, #f7efe3 0%, #f0dfc8 100%);
+      overflow: hidden;
+    }
+
+    .loading-container {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .logo {
+      width: 160px;
+      height: 160px;
+      margin: 0 auto 32px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, var(--violet) 0%, #5a3d8a 100%);
+      display: grid;
+      place-items: center;
+      font-size: 72px;
+      color: #fff;
+      box-shadow: 0 16px 40px rgba(107, 75, 161, 0.4);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--ink);
+    }
+
+    .subtitle {
+      margin: 0 0 48px;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .progress-bar {
+      width: 320px;
+      height: 8px;
+      margin: 0 auto 24px;
+      border-radius: 4px;
+      background: #e8dcc8;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--mint) 0%, var(--violet) 100%);
+      transition: width 300ms ease;
+    }
+
+    .progress-text {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .tip-box {
+      margin-top: 48px;
+      padding: 20px 28px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 8px 24px rgba(54, 38, 27, 0.1);
+      max-width: 320px;
+    }
+
+    .tip-icon {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      margin-right: 12px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, var(--gold) 0%, #e8b85d 100%);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+      line-height: 28px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .tip-text {
+      display: inline-block;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+      vertical-align: middle;
+    }
+
+    .version {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #b8ab9a;
+      font-size: 12px;
+    }
+
+    .tips-list {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="loading-container">
+    <div class="logo">🎒</div>
+    <h1>魔法背包</h1>
+    <p class="subtitle">Magic Backpack</p>
+    
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-text" id="progressText">正在加载...</div>
+    
+    <div class="tip-box">
+      <span class="tip-icon">💡</span>
+      <span class="tip-text" id="tipText">加载中...</span>
+    </div>
+  </div>
+  
+  <div class="version">Version 1.0.0</div>
+  
+  <div class="tips-list" id="tipsList">
+    <p>合理安排背包空间可以获得更高的准备值</p>
+    <p>不同类型的物品组合可以触发额外加成</p>
+    <p>旋转物品可以更好地利用背包空间</p>
+    <p>拖拽物品到桌面可以卸下装备</p>
+    <p>完成准备值目标即可出发冒险</p>
+    <p>魔法物品和工具可以搭配使用</p>
+    <p>注意物品的尺寸和形状</p>
+    <p>有些物品需要特定的放置位置</p>
+  </div>
+
+  <script>
+    const els = {
+      progressFill: document.querySelector('#progressFill'),
+      progressText: document.querySelector('#progressText'),
+      tipText: document.querySelector('#tipText'),
+      tipsList: document.querySelector('#tipsList')
+    };
+
+    const tips = [
+      '合理安排背包空间可以获得更高的准备值',
+      '不同类型的物品组合可以触发额外加成',
+      '旋转物品可以更好地利用背包空间',
+      '拖拽物品到桌面可以卸下装备',
+      '完成准备值目标即可出发冒险',
+      '魔法物品和工具可以搭配使用',
+      '注意物品的尺寸和形状',
+      '有些物品需要特定的放置位置'
+    ];
+
+    let currentTip = 0;
+    let progress = 0;
+    
+    function nextTip() {
+      currentTip = (currentTip + 1) % tips.length;
+      els.tipText.textContent = tips[currentTip];
+    }
+
+    function updateProgress() {
+      progress += Math.random() * 15 + 5;
+      if (progress > 100) progress = 100;
+      
+      els.progressFill.style.width = `${progress}%`;
+      els.progressText.textContent = `正在加载... ${Math.floor(progress)}%`;
+      
+      if (progress < 100) {
+        nextTip();
+        setTimeout(updateProgress, 200 + Math.random() * 300);
+      } else {
+        els.progressText.textContent = '加载完成';
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 800);
+      }
+    }
+
+    els.tipText.textContent = tips[currentTip];
+    nextTip();
+    setTimeout(updateProgress, 500);
+  </script>
+</body>
+</html>

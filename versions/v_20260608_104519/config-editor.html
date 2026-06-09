@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>配置编辑器 - 背包游戏</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f0e8;
+      color: #333;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #5a3d8a;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+
+    .tab-btn {
+      padding: 10px 30px;
+      border: 2px solid #5a3d8a;
+      background: white;
+      color: #5a3d8a;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      background: #f0e8ff;
+    }
+
+    .tab-btn.active {
+      background: #5a3d8a;
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .table-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px 12px;
+      text-align: left;
+      min-width: 50px;
+    }
+
+    th {
+      background: #5a3d8a;
+      color: white;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      white-space: nowrap;
+    }
+
+    tr:nth-child(even) {
+      background: #f9f7fc;
+    }
+
+    tr:hover {
+      background: #f0e8ff;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      min-width: 40px;
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+      background: white;
+    }
+
+    input[type="number"] {
+      min-width: 50px;
+      text-align: center;
+    }
+
+    input[type="text"] {
+      min-width: 60px;
+    }
+
+    input[type="color"] {
+      min-width: 40px;
+      height: 30px;
+      padding: 2px;
+      cursor: pointer;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #5a3d8a;
+      box-shadow: 0 0 0 2px rgba(90, 61, 138, 0.2);
+    }
+
+    input:hover:not(:disabled), textarea:hover:not(:disabled) {
+      border-color: #5a3d8a;
+    }
+
+    input:disabled, textarea:disabled {
+      background: #f5f5f5;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    /* 确保数字输入框总是可以编辑 */
+    input[type="number"]:hover,
+    input[type="number"]:focus,
+    input[type="number"]:active {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    /* 单元格样式优化 */
+    td input,
+    td textarea,
+    td select {
+      display: block;
+      width: 100%;
+      min-height: 30px;
+    }
+
+    td {
+      overflow: visible;
+    }
+
+    .table-container {
+      position: relative;
+      z-index: 1;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #5a3d8a;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #4a3070;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #e8e0f5;
+      color: #5a3d8a;
+    }
+
+    .btn-secondary:hover {
+      background: #d8cff0;
+    }
+
+    .btn-success {
+      background: #48bb78;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #38a169;
+    }
+
+    .btn-danger {
+      background: #e53e3e;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c53030;
+    }
+
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .output-container {
+      margin-top: 20px;
+      background: #1a1a2e;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .output-container h3 {
+      color: #f8f8f2;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .output-code {
+      background: #282a36;
+      color: #f8f8f2;
+      padding: 16px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .help-text {
+      background: #e8f4fd;
+      border-left: 4px solid #4299e1;
+      padding: 12px 16px;
+      margin: 10px 0;
+      border-radius: 0 6px 6px 0;
+      font-size: 13px;
+      color: #2c5282;
+    }
+
+    .array-input {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      min-height: 32px;
+    }
+
+    .array-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #e8e0f5;
+      color: #5a3d8a;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .array-tag-remove {
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .array-tag-remove:hover {
+      color: #e53e3e;
+    }
+
+    .add-item-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .add-item-container input {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 背包游戏配置编辑器</h1>
+    <p class="subtitle">像 Excel 一样编辑物品和关卡配置，导出后直接覆盖原始文件</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="items">📦 物品表</button>
+      <button class="tab-btn" data-tab="levels">🏔️ 关卡表</button>
+      <button class="tab-btn" data-tab="level-items">📋 关卡物品表</button>
+    </div>
+
+    <div id="items-tab" class="tab-content active">
+      <div class="table-container">
+        <div class="help-text">
+          <strong>提示：</strong>配置物品信息，每个物品需要唯一的 ID。填写完成后点击"保存配置"按钮。
+        </div>
+        <div class="add-item-container">
+          <button class="btn btn-primary btn-sm" onclick="addItemRow()">➕ 添加物品</button>
+        </div>
+        <table id="items-table">
+          <thead>
+            <tr>
+              <th style="width: 80px;">ID</th>
+              <th style="width: 100px;">名称</th>
+              <th style="width: 80px;">图标</th>
+              <th style="width: 70px;">宽</th>
+              <th style="width: 70px;">高</th>
+              <th style="width: 70px;">分值</th>
+              <th style="width: 100px;">类型</th>
+              <th style="width: 120px;">标签</th>
+              <th style="width: 100px;">颜色</th>
+              <th>描述</th>
+              <th style="width: 80px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="items-tbody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="levels-tab" class="tab-content">
+      <div class="table-container">
+        <div class="help-text">
+          <strong>提示：</strong>配置关卡信息，空值会自动继承上一行的值。可选物品在"关卡物品表"标签页中配置。
+        </div>
+        <div class="add-item-container">
+          <button class="btn btn-primary btn-sm" onclick="addLevelRow()">➕ 添加关卡</button>
+        </div>
+        <table id="levels-table">
+          <thead>
+            <tr>
+              <th style="width: 70px;">ID</th>
+              <th style="width: 80px;">天数</th>
+              <th style="width: 120px;">名称</th>
+              <th style="width: 70px;">列数</th>
+              <th style="width: 70px;">行数</th>
+              <th style="width: 80px;">目标分</th>
+              <th style="width: 80px;">物品总分</th>
+              <th style="width: 150px;">规则</th>
+              <th style="width: 150px;">规则描述</th>
+              <th>简介</th>
+              <th>通关消息</th>
+              <th style="width: 80px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="levels-tbody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="level-items-tab" class="tab-content">
+      <div class="table-container">
+        <div class="help-text">
+          <strong>提示：</strong>配置每个关卡的可选物品。每行对应一个关卡，可添加多个物品ID（用逗号分隔）。关卡ID必须与关卡表中的ID对应。点击"随机"按钮可根据关卡的物品总分随机生成物品（物品分值之和不超过物品总分）。
+        </div>
+        <div class="add-item-container">
+          <button class="btn btn-primary btn-sm" onclick="addLevelItemRow()">➕ 添加关卡物品</button>
+        </div>
+        <table id="level-items-table">
+          <thead>
+            <tr>
+              <th style="width: 100px;">关卡ID</th>
+              <th>可选物品列表（用逗号分隔）</th>
+              <th style="width: 160px;">操作</th>
+            </tr>
+          </thead>
+          <tbody id="level-items-tbody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-success" onclick="saveConfig()">💾 保存配置</button>
+      <button class="btn btn-secondary" onclick="loadConfig()">📂 导入配置</button>
+      <button class="btn btn-secondary" onclick="resetConfig()">🔄 重置为默认</button>
+      <button class="btn btn-primary" onclick="goToGame()">🎮 返回游戏</button>
+    </div>
+
+    <div id="output-section" class="output-container" style="display: none;">
+      <h3>📝 生成的配置代码</h3>
+      <div id="output-code" class="output-code"></div>
+    </div>
+  </div>
+
+  <script>
+    const defaultItems = [
+      { id: "potion", name: "药水", icon: "potion", width: 1, height: 1, score: 2, type: "potion", tag: "1x1 药剂", color: "#B7E6D0", description: "恢复魔力的药剂" },
+      { id: "herb", name: "草药", icon: "herb", width: 2, height: 1, score: 3, type: "herb", tag: "2x1 草药", color: "#9FD39C", description: "新鲜采集的草药" },
+      { id: "book", name: "魔法书", icon: "book", width: 2, height: 2, score: 6, type: "magic", tag: "2x2 魔法", color: "#C4B5FD", description: "记载古老咒语的魔法书" },
+      { id: "broom", name: "扫帚", icon: "broom", width: 1, height: 4, score: 8, type: "tool", tag: "1x4 工具", color: "#F2C46D", description: "可飞行的魔法扫帚" },
+      { id: "mushroom", name: "蘑菇篮", icon: "mushroom", width: 2, height: 1, score: 3, type: "herb", tag: "2x1 食材", color: "#DFA7C7", description: "新鲜采摘的蘑菇" },
+      { id: "crystal", name: "水晶球", icon: "crystal", width: 2, height: 2, score: 7, type: "magic", tag: "2x2 占卜", color: "#A7D8F2", description: "用于占卜的水晶球" },
+      { id: "coin", name: "金币袋", icon: "coin", width: 1, height: 2, score: 4, type: "treasure", tag: "1x2 财物", color: "#F3C66D", description: "装满金币的袋子" },
+      { id: "scroll", name: "卷轴", icon: "scroll", width: 1, height: 3, score: 5, type: "magic", tag: "1x3 魔法", color: "#E9D7B4", description: "记载魔法卷轴" },
+      { id: "fire", name: "火焰石", icon: "fire", width: 1, height: 1, score: 5, type: "fire", tag: "1x1 火", color: "#F2A09A", description: "蕴含火焰力量的石头" },
+      { id: "cloth", name: "披风", icon: "cloth", width: 2, height: 3, score: 7, type: "cloth", tag: "2x3 布料", color: "#BBA4D8", description: "魔法防护披风" },
+      { id: "wand", name: "魔杖", icon: "wand", width: 1, height: 3, score: 6, type: "magic", tag: "1x3 工具", color: "#D4C5E8", description: "施放魔法的魔杖" },
+      { id: "lantern", name: "魔法灯", icon: "lantern", width: 1, height: 2, score: 4, type: "tool", tag: "1x2 工具", color: "#FFD966", description: "永不熄灭的魔法灯" }
+    ];
+
+    const defaultLevels = [
+      { id: 1, day: "Day 1", name: "森林采露水", gridCols: 6, gridRows: 5, targetScore: 18, itemsTotalScore: 36, rules: ["adjacent_bonus"], rulesDescription: "相邻加成", brief: "今天要去森林采集晨露。至少准备 18 点，草药靠近药水会有额外加成。", clearMessage: "背包啪地合上，露娜带着晨露瓶和草药走进森林。" },
+      { id: 2, day: "Day 2", name: "月光集市", gridCols: 6, gridRows: 5, targetScore: 24, itemsTotalScore: 40, rules: ["adjacent_bonus", "rotation"], rulesDescription: "相邻加成 + 旋转", brief: "集市很热闹，但背包空间更紧。金币袋靠近水晶会额外加分。", clearMessage: "金币袋轻轻一响，水晶映出月光。露娜准备好去集市换取新材料。" },
+      { id: 3, day: "Day 3", name: "旧钟楼", gridCols: 6, gridRows: 5, targetScore: 28, itemsTotalScore: 45, rules: ["forbidden_adjacent"], rulesDescription: "禁忌相邻", brief: "旧钟楼里到处是旧布和魔火。火焰石不能贴着布料，否则会被判定为危险收纳。", clearMessage: "火焰石被妥帖隔开，披风没有一点焦痕。露娜满意地扣上背包。" },
+      { id: 4, day: "Day 4", name: "魔法学院", gridCols: 6, gridRows: 6, targetScore: 32, itemsTotalScore: 44, rules: ["adjacent_bonus", "rotation"], rulesDescription: "相邻加成 + 旋转", brief: "魔法学院的课程需要更多魔法物品。合理安排空间获得更高分数。", clearMessage: "魔杖和魔法书准备完毕，露娜自信地走向学院大门。" },
+      { id: 5, day: "Day 5", name: "龙穴探险", gridCols: 7, gridRows: 6, targetScore: 38, itemsTotalScore: 55, rules: ["adjacent_bonus", "forbidden_adjacent"], rulesDescription: "禁忌相邻", brief: "龙穴探险充满危险！火焰石不能靠近布料，但可以和药水相邻获得加成。", clearMessage: "装备已准备就绪，露娜勇敢地踏入龙穴。" }
+    ];
+
+    const defaultLevelItems = [
+      { levelId: 1, items: ["potion", "herb", "book", "broom", "mushroom", "crystal", "coin"] },
+      { levelId: 2, items: ["coin", "crystal", "book", "broom", "potion", "herb", "scroll", "mushroom"] },
+      { levelId: 3, items: ["fire", "cloth", "broom", "book", "potion", "herb", "scroll", "crystal", "coin"] },
+      { levelId: 4, items: ["book", "wand", "scroll", "potion", "crystal", "herb", "coin", "lantern"] },
+      { levelId: 5, items: ["fire", "potion", "herb", "book", "broom", "crystal", "coin", "cloth", "lantern"] }
+    ];
+
+    let itemsData = [];
+    let levelsData = [];
+    let levelItemsData = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initTabs();
+      loadConfig();
+      initInputHandlers();
+    });
+
+    function initInputHandlers() {
+      document.addEventListener('focusin', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          e.target.removeAttribute('readonly');
+          e.target.removeAttribute('disabled');
+        }
+      });
+      
+      document.addEventListener('mousedown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          setTimeout(() => {
+            e.target.readOnly = false;
+            e.target.disabled = false;
+          }, 0);
+        }
+      });
+    }
+
+    function initTabs() {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          
+          btn.classList.add('active');
+          document.getElementById(`${btn.dataset.tab}-tab`).classList.add('active');
+        });
+      });
+    }
+
+    function renderItemsTable() {
+      const tbody = document.getElementById('items-tbody');
+      tbody.innerHTML = '';
+      
+      itemsData.forEach((item, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="text" value="${item.id}" onchange="updateItem(${index}, 'id', this.value)"></td>
+          <td><input type="text" value="${item.name}" onchange="updateItem(${index}, 'name', this.value)"></td>
+          <td><input type="text" value="${item.icon}" onchange="updateItem(${index}, 'icon', this.value)"></td>
+          <td><input type="number" value="${item.width}" onchange="updateItem(${index}, 'width', parseInt(this.value))"></td>
+          <td><input type="number" value="${item.height}" onchange="updateItem(${index}, 'height', parseInt(this.value))"></td>
+          <td><input type="number" value="${item.score}" onchange="updateItem(${index}, 'score', parseInt(this.value))"></td>
+          <td><input type="text" value="${item.type}" onchange="updateItem(${index}, 'type', this.value)"></td>
+          <td><input type="text" value="${item.tag}" onchange="updateItem(${index}, 'tag', this.value)"></td>
+          <td><input type="color" value="${item.color}" onchange="updateItem(${index}, 'color', this.value)"></td>
+          <td><textarea rows="1" onchange="updateItem(${index}, 'description', this.value)">${item.description}</textarea></td>
+          <td class="row-actions">
+            <button class="btn btn-danger btn-sm" onclick="removeItem(${index})">删除</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderLevelsTable() {
+      const tbody = document.getElementById('levels-tbody');
+      tbody.innerHTML = '';
+      
+      levelsData.forEach((level, index) => {
+        const tr = document.createElement('tr');
+        
+        tr.innerHTML = `
+          <td><input type="number" value="${level.id}" onchange="updateLevel(${index}, 'id', parseInt(this.value))"></td>
+          <td><input type="text" value="${level.day}" onchange="updateLevel(${index}, 'day', this.value)"></td>
+          <td><input type="text" value="${level.name}" onchange="updateLevel(${index}, 'name', this.value)"></td>
+          <td><input type="number" value="${level.gridCols}" onchange="updateLevel(${index}, 'gridCols', parseInt(this.value))"></td>
+          <td><input type="number" value="${level.gridRows}" onchange="updateLevel(${index}, 'gridRows', parseInt(this.value))"></td>
+          <td><input type="number" value="${level.targetScore}" onchange="updateLevel(${index}, 'targetScore', parseInt(this.value))"></td>
+          <td><input type="number" value="${level.itemsTotalScore || 0}" onchange="updateLevel(${index}, 'itemsTotalScore', parseInt(this.value) || 0)"></td>
+          <td><input type="text" value="${level.rules.join(',')}" onchange="updateLevel(${index}, 'rules', this.value.split(',').map(s => s.trim()).filter(s => s))"></td>
+          <td><input type="text" value="${level.rulesDescription}" onchange="updateLevel(${index}, 'rulesDescription', this.value)"></td>
+          <td><textarea rows="1" onchange="updateLevel(${index}, 'brief', this.value)">${level.brief}</textarea></td>
+          <td><textarea rows="1" onchange="updateLevel(${index}, 'clearMessage', this.value)">${level.clearMessage}</textarea></td>
+          <td class="row-actions">
+            <button class="btn btn-danger btn-sm" onclick="removeLevel(${index})">删除</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function calculateItemsTotalScore(itemIds) {
+      return itemIds.reduce((total, itemId) => {
+        const item = itemsData.find(i => i.id === itemId);
+        return total + (item ? item.score : 0);
+      }, 0);
+    }
+
+    function addItemRow() {
+      const newId = `item_${Date.now()}`;
+      itemsData.push({
+        id: newId,
+        name: "新物品",
+        icon: newId,
+        width: 1,
+        height: 1,
+        score: 1,
+        type: "misc",
+        tag: "1x1 物品",
+        color: "#cccccc",
+        description: "物品描述"
+      });
+      renderItemsTable();
+    }
+
+    function addLevelRow() {
+      const newId = levelsData.length + 1;
+      levelsData.push({
+        id: newId,
+        day: `Day ${newId}`,
+        name: "新关卡",
+        gridCols: 6,
+        gridRows: 5,
+        targetScore: 20,
+        itemsTotalScore: 30,
+        rules: ["adjacent_bonus"],
+        rulesDescription: "相邻加成",
+        brief: "关卡简介",
+        clearMessage: "通关提示"
+      });
+      levelItemsData.push({
+        levelId: newId,
+        items: ["potion", "herb", "book"],
+        _lastItemsTotalScore: 30
+      });
+      renderLevelsTable();
+      renderLevelItemsTable();
+    }
+
+    function renderLevelItemsTable() {
+      const tbody = document.getElementById('level-items-tbody');
+      tbody.innerHTML = '';
+      
+      levelItemsData.forEach((levelItem, index) => {
+        const levelConfig = levelsData.find(l => l.id === levelItem.levelId);
+        const itemsTotalScore = levelConfig?.itemsTotalScore || 0;
+        const currentScore = calculateItemsScore(levelItem.items);
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><input type="number" value="${levelItem.levelId}" onchange="updateLevelItem(${index}, 'levelId', parseInt(this.value))"></td>
+          <td>
+            <input type="text" value="${levelItem.items.join(',')}" onchange="updateLevelItem(${index}, 'items', this.value.split(',').map(s => s.trim()).filter(s => s))" style="width: 70%;">
+            <span style="margin-left: 8px; font-size: 12px; color: #666;">
+              (${currentScore}/${itemsTotalScore})
+            </span>
+          </td>
+          <td class="row-actions">
+            <button class="btn btn-info btn-sm" onclick="randomizeLevelItems(${index})">🎲 随机</button>
+            <button class="btn btn-danger btn-sm" onclick="removeLevelItem(${index})">删除</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function calculateItemsScore(itemIds) {
+      return itemIds.reduce((total, itemId) => {
+        const item = itemsData.find(i => i.id === itemId);
+        return total + (item ? item.score : 0);
+      }, 0);
+    }
+
+    function randomizeLevelItems(index) {
+      const levelItem = levelItemsData[index];
+      const levelConfig = levelsData.find(l => l.id === levelItem.levelId);
+      const maxScore = levelConfig?.itemsTotalScore || 30;
+      
+      const selectedItems = [];
+      let currentScore = 0;
+      const shuffled = [...itemsData].sort(() => Math.random() - 0.5);
+      
+      for (const item of shuffled) {
+        if (currentScore + item.score <= maxScore) {
+          selectedItems.push(item.id);
+          currentScore += item.score;
+        }
+        if (currentScore >= maxScore) break;
+      }
+      
+      levelItemsData[index].items = selectedItems;
+      renderLevelItemsTable();
+    }
+
+    function addLevelItemRow() {
+      const newLevelId = levelItemsData.length > 0 ? Math.max(...levelItemsData.map(li => li.levelId)) + 1 : 1;
+      const levelConfig = levelsData.find(l => l.id === newLevelId);
+      levelItemsData.push({
+        levelId: newLevelId,
+        items: ["potion", "herb", "book"],
+        _lastItemsTotalScore: levelConfig?.itemsTotalScore || 0
+      });
+      renderLevelItemsTable();
+    }
+
+    function updateLevelItem(index, field, value) {
+      levelItemsData[index][field] = value;
+    }
+
+    function removeLevelItem(index) {
+      if (confirm('确定要删除这条关卡物品配置吗？')) {
+        levelItemsData.splice(index, 1);
+        renderLevelItemsTable();
+      }
+    }
+
+    function removeItem(index) {
+      if (confirm('确定要删除这个物品吗？')) {
+        itemsData.splice(index, 1);
+        renderItemsTable();
+      }
+    }
+
+    function removeLevel(index) {
+      if (confirm('确定要删除这个关卡吗？')) {
+        const levelId = levelsData[index].id;
+        levelsData.splice(index, 1);
+        levelItemsData = levelItemsData.filter(li => li.levelId !== levelId);
+        renderLevelsTable();
+        renderLevelItemsTable();
+      }
+    }
+
+    function updateItem(index, field, value) {
+      itemsData[index][field] = value;
+    }
+
+    function updateLevel(index, field, value) {
+      levelsData[index][field] = value;
+    }
+
+    function generateItemsJS() {
+      const itemsStr = itemsData.map(item => `  { id: "${item.id}", name: "${item.name}", icon: "${item.icon}", width: ${item.width}, height: ${item.height}, score: ${item.score}, type: "${item.type}", tag: "${item.tag}", color: "${item.color}", description: "${item.description}" }`).join(',\n');
+      
+      return `export const itemsTable = [\n${itemsStr}\n];
+
+export const getItemById = (id) => {
+  return itemsTable.find(item => item.id === id);
+};
+
+export const getItemsByType = (type) => {
+  return itemsTable.filter(item => item.type === type);
+};
+
+export const getItemScore = (id) => {
+  const item = getItemById(id);
+  return item ? item.score : 0;
+};
+`;
+    }
+
+    function generateLevelsJS() {
+      const levelsStr = levelsData.map(level => {
+        const rulesStr = JSON.stringify(level.rules);
+        return `  {
+    id: ${level.id},
+    day: "${level.day}",
+    name: "${level.name}",
+    gridCols: ${level.gridCols},
+    gridRows: ${level.gridRows},
+    targetScore: ${level.targetScore},
+    itemsTotalScore: ${level.itemsTotalScore || 0},
+    rules: ${rulesStr},
+    rulesDescription: "${level.rulesDescription}",
+    brief: "${level.brief}",
+    clearMessage: "${level.clearMessage}"
+  }`;
+      }).join(',\n');
+
+      return `import { itemsTable, getItemById } from './items.js';
+
+export const levelsTable = [\n${levelsStr}\n];
+
+export const getLevelById = (id) => {
+  return levelsTable.find(level => level.id === id);
+};
+
+export const getLevelByIndex = (index) => {
+  return levelsTable[index];
+};
+
+export const getTotalLevels = () => {
+  return levelsTable.length;
+};
+
+export const calculateAvailableItemsScore = (level) => {
+  let totalScore = 0;
+  level.availableItems.forEach(itemId => {
+    const item = getItemById(itemId);
+    if (item) {
+      totalScore += item.score;
+    }
+  });
+  return totalScore;
+};
+
+export const getLevelConfig = (index) => {
+  if (index < 0 || index >= levelsTable.length) {
+    return null;
+  }
+  
+  const current = levelsTable[index];
+  const previous = index > 0 ? levelsTable[index - 1] : null;
+  
+  return {
+    id: current.id,
+    day: current.day || previous?.day || "Day 1",
+    name: current.name || previous?.name || "未知关卡",
+    gridCols: current.gridCols || previous?.gridCols || 6,
+    gridRows: current.gridRows || previous?.gridRows || 5,
+    targetScore: current.targetScore || previous?.targetScore || 18,
+    rules: current.rules || previous?.rules || [],
+    rulesDescription: current.rulesDescription || previous?.rulesDescription || "",
+    availableItems: current.availableItems || previous?.availableItems || [],
+    brief: current.brief || previous?.brief || "",
+    clearMessage: current.clearMessage || previous?.clearMessage || ""
+  };
+};
+`;
+    }
+
+    function saveConfig() {
+      resyncLevelItemsTotalScore();
+      
+      const itemsJS = generateItemsJS();
+      const levelsJS = generateLevelsJS();
+      const levelItemsJS = generateLevelItemsJS();
+      
+      downloadFile('items.js', itemsJS);
+      downloadFile('levels.js', levelsJS);
+      downloadFile('level-items.js', levelItemsJS);
+      
+      alert('配置已保存！');
+    }
+
+    function resyncLevelItemsTotalScore() {
+      levelItemsData.forEach((levelItem, index) => {
+        const levelConfig = levelsData.find(l => l.id === levelItem.levelId);
+        if (!levelConfig) return;
+        
+        const newTotalScore = levelConfig.itemsTotalScore || 0;
+        const oldTotalScore = levelItem._lastItemsTotalScore || 0;
+        
+        if (newTotalScore !== oldTotalScore) {
+          levelItem._lastItemsTotalScore = newTotalScore;
+          if (newTotalScore > 0) {
+            const selectedItems = [];
+            let currentScore = 0;
+            const shuffled = [...itemsData].sort(() => Math.random() - 0.5);
+            
+            for (const item of shuffled) {
+              if (currentScore + item.score <= newTotalScore) {
+                selectedItems.push(item.id);
+                currentScore += item.score;
+              }
+              if (currentScore >= newTotalScore) break;
+            }
+            
+            levelItem.items = selectedItems;
+          }
+        }
+      });
+      renderLevelItemsTable();
+    }
+
+    function downloadFile(filename, content) {
+      const blob = new Blob([content], { type: 'text/javascript;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function loadConfig() {
+      itemsData = JSON.parse(JSON.stringify(defaultItems));
+      levelsData = JSON.parse(JSON.stringify(defaultLevels));
+      levelItemsData = JSON.parse(JSON.stringify(defaultLevelItems));
+      levelItemsData.forEach(li => {
+        const levelConfig = levelsData.find(l => l.id === li.levelId);
+        li._lastItemsTotalScore = levelConfig?.itemsTotalScore || 0;
+      });
+      renderItemsTable();
+      renderLevelsTable();
+      renderLevelItemsTable();
+    }
+
+    function resetConfig() {
+      if (confirm('确定要重置为默认配置吗？所有修改将丢失！')) {
+        loadConfig();
+      }
+    }
+
+    function goToGame() {
+      window.location.href = 'login.html';
+    }
+
+    function generateLevelItemsJS() {
+      const levelItemsStr = levelItemsData.map(li => {
+        const itemsStr = JSON.stringify(li.items);
+        return `  { levelId: ${li.levelId}, items: ${itemsStr} }`;
+      }).join(',\n');
+
+      return `export const levelItemsTable = [\n${levelItemsStr}\n];
+
+export const getLevelItems = (levelId) => {
+  return levelItemsTable.find(item => item.levelId === levelId)?.items || [];
+};
+`;
+    }
+  </script>
+</body>
+</html>
